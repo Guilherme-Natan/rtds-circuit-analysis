@@ -1,0 +1,4 @@
+* Due to the way this script works, if you wan't to create a short circuited current source, you need to use a
+* 0 ohms resistor.
+Iin in 0 Iin
+R0 in 0 0

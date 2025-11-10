@@ -1,0 +1,4 @@
+Vin in 0 Vin
+R1 in out 5K
+R21 out 0 10K
+R22 out 0 10K
