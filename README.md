@@ -96,7 +96,3 @@ circuit.print_component_voltages("R1", "R2")
 ```
 
 <!-- TODO: Link the section about the library in the sphinx docs here -->
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
