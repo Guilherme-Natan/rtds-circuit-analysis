@@ -33,7 +33,7 @@ circuit. They will be formatted like `Vin in 0 V`, where:
 
 For example, here is a basic RLC circuit...
 
-![rlc_circuit](./docs/_static/rlc_circuit.png)
+![rlc_circuit](https://raw.githubusercontent.com/Guilherme-Natan/rtds-circuit-analysis/refs/heads/main/docs/_static/rlc_circuit.png)
 
 ... and its netlist representation:
 ```
