@@ -74,7 +74,7 @@ def parse_value(value: str) -> sp.Expr:
         return sp.Symbol(value)
 
     # Splits the value between the number part, and the rest (including SI prefix)
-    match = re.search(r"[\d\.\-e]+", value)
+    match = re.search(r"[\d\.\-+eE]+", value)
     value_number_part = match.group(0)
     value_rest = value[match.end(0) :]
     if value_number_part == "-":
