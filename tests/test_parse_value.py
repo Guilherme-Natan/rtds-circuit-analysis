@@ -22,8 +22,8 @@ class TestValues(unittest.TestCase):
             self.assertEqual(parsed_n, correct_n)
 
     def test_dot_numbers(self):
-        numbers = ["0.0", "-0.0", "1.234", "1.20", "-1.5", "-85738.1958"]
-        correct_numbers = [0, 0, 1.234, 1.2, -1.5, -85738.1958]
+        numbers = ["0.0", "-0.0", "1.234", "1.20", "-1.5", "-85738.1958", ".1"]
+        correct_numbers = [0, 0, 1.234, 1.2, -1.5, -85738.1958, 0.1]
         for i in range(len(correct_numbers)):
             correct_numbers[i] = sympy.Rational(str(correct_numbers[i]))
         for n, correct_n in zip(numbers, correct_numbers):
@@ -52,6 +52,43 @@ class TestValues(unittest.TestCase):
             -0.0000017,
             0.0000000000003,
             0.857,
+        ]
+        for i in range(len(correct_numbers)):
+            correct_numbers[i] = sympy.Rational(str(correct_numbers[i]))
+        for n, correct_n in zip(numbers, correct_numbers):
+            parsed_n = parse_value(n)
+            self.assertEqual(parsed_n, correct_n)
+
+    def test_exponential_notation(self):
+        numbers = [
+            "1e3",
+            "1E3",
+            "1e-3",
+            "-1e3",
+            "1.2e3",
+            ".5e2",
+            "5e+3",
+            "0e0",
+            "-0e5",
+            "9.99e2",
+            "3.1415e0",
+            "2e-1",
+            "1e+03",
+        ]
+        correct_numbers = [
+            1000,
+            1000,
+            0.001,
+            -1000,
+            1200,
+            50,
+            5000,
+            0,
+            0,
+            999,
+            3.1415,
+            0.2,
+            1000,
         ]
         for i in range(len(correct_numbers)):
             correct_numbers[i] = sympy.Rational(str(correct_numbers[i]))
