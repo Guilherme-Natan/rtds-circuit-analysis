@@ -11,6 +11,7 @@ def create_parser():
     """
     parser = argparse.ArgumentParser(
         description="Finds the equations that describe a circuit written as a netlist",
+        usage="%(prog)s [filepath] [options]",
     )
     parser.add_argument(
         "filepath",
@@ -20,11 +21,12 @@ def create_parser():
     )
 
     parser.add_argument(
-        "-n",
-        "--node-voltages",
+        "-i",
+        "--currents",
         nargs="*",
-        metavar="NODES",
-        help="Prints the voltages for each of the NODES. If NODES are not specified, prints the voltages at all nodes",
+        metavar="COMPONENTS",
+        help="Prints the currents for each of the COMPONENTS. If COMPONENTS are not specified, prints the currents"
+        "through all components.",
     )
 
     parser.add_argument(
@@ -37,12 +39,11 @@ def create_parser():
     )
 
     parser.add_argument(
-        "-i",
-        "--currents",
+        "-n",
+        "--node-voltages",
         nargs="*",
-        metavar="COMPONENTS",
-        help="Prints the currents for each of the COMPONENTS. If COMPONENTS are not specified, prints the currents"
-        "through all components.",
+        metavar="NODES",
+        help="Prints the voltages for each of the NODES. If NODES are not specified, prints the voltages at all nodes",
     )
 
     parser.add_argument(
