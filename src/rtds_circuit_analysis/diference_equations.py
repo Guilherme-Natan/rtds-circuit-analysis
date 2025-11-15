@@ -72,7 +72,10 @@ def trapezoidal(continuous_symbols: sp.Symbol) -> list[sp.Expr]:
 
 
 def convert_to(
-    discrete_method: Callable, variable: str, continuous_expression: sp.Expr, time_step: str | None
+    discrete_method: Callable,
+    variable: str,
+    continuous_expression: sp.Expr,
+    time_step: sp.Rational | None,
 ) -> sp.Eq:
     """Convert a state equation in differential form, to its respective difference form.
 
@@ -81,7 +84,7 @@ def convert_to(
         variable (str): The variable related to the component's equation, in differential form.
         continuous_expression (sp.Expr): The variable's expression, in continuous form, related to the "right hand side"
         of the state equation.
-        time_step (str | None): The time step for the circuit. If it is None, the expressions will receive the
+        time_step (sp.Rational | None): The time step for the circuit. If it is None, the expressions will receive the
         time step as a "Ts" sympy symbol.
 
     Returns:
@@ -110,8 +113,6 @@ def convert_to(
     new_value, old_value = sp.Symbol(variable + "_{n}"), sp.Symbol(variable + "_{n-1}")
     if not time_step:
         time_step = sp.Symbol("Ts")
-    else:
-        time_step = sp.Rational(time_step)
     return sp.Eq(new_value, old_value + time_step * discrete_expression)
 
 
@@ -158,7 +159,7 @@ def convert_explicit(
     discrete_method: Callable,
     states_continuous: list[sp.Expr],
     to_solve_for: list[sp.Expr],
-    time_step: str | None,
+    time_step: sp.Rational | None,
 ) -> dict[str, sp.Expr]:
     """Convert the state equations in continuous form into their (explicit) discrete form.
 
@@ -166,7 +167,7 @@ def convert_explicit(
         discrete_method (Callable): The method to use for the transform.
         states_continuous (list[sp.Expr]): The state equations for the circuit, in continuous form.
         to_solve_for (list[sp.Expr]):
-        time_step (str | None): The time step for the circuit. If it is None, the expressions will receive the
+        time_step (sp.Rational | None): The time step for the circuit. If it is None, the expressions will receive the
         time step as a "Ts" sympy symbol.
 
     Returns:
@@ -185,7 +186,8 @@ def convert_explicit(
 
 
 def differential_to_difference(
-    states_continuous: list[sp.Expr], time_step: str | None = None
+    states_continuous: list[sp.Expr],
+    time_step: sp.Rational | None = None,
 ) -> tuple[dict[str, sp.Expr], dict[str, sp.Expr], dict[str, sp.Expr]]:
     """Transform the state equations in continuous form in the circuit, into their difference form, for the forward,
     backward and trapezoidal methods.
