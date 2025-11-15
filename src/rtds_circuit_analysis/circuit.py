@@ -1,5 +1,3 @@
-"""Module that contains the circuit class"""
-
 import os
 
 from rtds_circuit_analysis.diference_equations import differential_to_difference
@@ -19,7 +17,7 @@ class Circuit:
             circuit_data = circuit_data.strip().split("\n")
 
         self.components, possible_time_step = parse_components(circuit_data)
-        if possible_time_step:
+        if not time_step and possible_time_step:
             time_step = possible_time_step
 
         parse_data(self.components)
@@ -71,32 +69,60 @@ class Circuit:
 
     def print_currents(self, *components):
         """Prints the current for the given components (excluding inductors and current sources, which are obvious). If
-        no components are given, prints the currents for *every* component."""
+        no components are given, prints the currents for *every* component.
+
+        Args:
+            *components: List of components to get the current for. If empty, prints the currents for every component.
+        """
         print(self._formatted_currents(components))
 
     def print_component_voltages(self, *components):
         """Prints the voltage for the given components (excluding capacitors and voltage sources, which are obvious). If
-        no components are given, prints the voltages for *every* component."""
+        no components are given, prints the voltages for *every* component.
+
+        Args:
+            *components: List of components to get the voltages for. If empty, prints the voltage for every component.
+        """
         print(self._formatted_component_voltages(components))
 
     def print_node_voltages(self, *nodes):
-        """Prints the voltage for each node. If no nodes are given, prints the voltages for every node."""
+        """Prints the voltage for each node. If no nodes are given, prints the voltages for every node.
+
+        Args:
+            *nodes: List of nodes to get the voltages for. If empty, prints the voltage for every node.
+        """
         print(self._formatted_node_voltages(nodes))
 
     def print_states(self, *components):
-        """Prints the state equations for the system (continuous). If no components are given,"""
+        """Prints the state equations for the system (continuous).
+
+        Args:
+            *components: List of components to get the state equations for. If empty, prints all the state equations for the circuit.
+        """
         print(self._formatted_states(components))
 
     def print_forward(self, *components):
-        """Prints the state equations for the system (forward)."""
+        """Prints the state equations for the system (forward).
+
+        Args:
+            *components: List of components to get the state equations for. If empty, prints all the state equations for the circuit.
+        """
         print(self._formatted_forward(components))
 
     def print_backward(self, *components):
-        """Prints the state equations for the system (backward)."""
+        """Prints the state equations for the system (backward).
+
+        Args:
+            *components: List of components to get the state equations for. If empty, prints all the state equations for the circuit.
+        """
         print(self._formatted_backward(components))
 
     def print_trapezoidal(self, *components):
-        """Prints the state equations for the system (trapezoidal)."""
+        """Prints the state equations for the system (trapezoidal).
+
+        Args:
+            *components: List of components to get the state equations for. If empty, prints all the state equations for the circuit.
+        """
         print(self._formatted_trapezoidal(components))
 
     def print_all(self):
