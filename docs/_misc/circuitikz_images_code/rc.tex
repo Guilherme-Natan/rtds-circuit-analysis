@@ -1,0 +1,15 @@
+\documentclass{standalone}
+\usepackage[siunitx, american]{circuitikz}
+\usepackage{siunitx}
+
+\begin{document}
+\begin{circuitikz}[american]
+  \draw
+    (0,0) to[V, l=$V$, invert] (0,3)
+    (0,3) to[R, l=$R$] (3,3)
+    (3,3) to[C, l=$C$] (3,0)
+    (3,0) -- (0,0);
+
+    \draw (1.5,0) node[ground] (gnd) {};
+\end{circuitikz}
+\end{document}

@@ -88,7 +88,7 @@ def create_parser():
         nargs="?",
         metavar="TIMESTEP",
         help='Sets the time step for the discrete methods. If not set, the discrete methods will have "Ts" as a literal'
-        "for the timestep",
+        "for the timestep. Will take precedence over the netlist's .STEP, if set.",
     )
 
     return parser

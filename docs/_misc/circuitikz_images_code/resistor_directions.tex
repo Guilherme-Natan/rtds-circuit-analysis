@@ -1,0 +1,18 @@
+\documentclass{standalone}
+\usepackage[siunitx, american]{circuitikz}
+\usepackage{siunitx}
+
+\begin{document}
+\begin{circuitikz}[american]
+  
+  \draw
+  (2.25,0) node[ground] (gnd) {} % nó de terra
+  (0,4.5) node[circ,label=left:IN] (n1) {} % nó IN
+    to[V, l_=$V_1$, a^=10<\volt>] (0,0)
+  % Resistores
+  (n1) to[R, l2=$R_1$ and \SI{1}{\kilo\ohm}, label distance=2mm, v=$V_{R1}$, i=$i_{R1}$] (4.5,4.5) node[circ,label=right:OUT] (n2) {}
+  (n2) to[R, l2=$R_2$ and \SI{1}{\kilo\ohm}, v<=$V_{R2}$, i<^=$i_{R2}$] (4.5,0)
+  -- (0,0);
+
+\end{circuitikz}
+\end{document}
