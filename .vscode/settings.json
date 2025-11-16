@@ -35,7 +35,8 @@
         "--max-line-length=120"
     ],
     "cSpell.ignoreWords": [
-        "netlist",
-        "rtds"
+        "netlist", "netlists",
+        "rtds",
+        "pipx"
     ],
 }
