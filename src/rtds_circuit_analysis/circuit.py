@@ -1,4 +1,5 @@
 import os
+from typing import TYPE_CHECKING
 
 from rtds_circuit_analysis.diference_equations import differential_to_difference
 from rtds_circuit_analysis.format_output import format_output
@@ -6,17 +7,49 @@ from rtds_circuit_analysis.parse_data import parse_data
 from rtds_circuit_analysis.parse_netlist import get_lines, parse_components
 from rtds_circuit_analysis.solve_circuit import solve_circuit
 
+if TYPE_CHECKING:
+    import sympy
+
+    from rtds_circuit_analysis.parse_data import Component
+
 
 class Circuit:
-    """Class that represents a circuit and all its data."""
+    """Class that represents a circuit and all its data.
 
-    def __init__(self, circuit_data: str, time_step: str | None = None):
-        if os.path.exists(circuit_data):
-            circuit_data = get_lines(circuit_data)
+    Args:
+        netlist (str): The netlist for the circuit. It can be either the path for a file containing the netlist, or the
+          netlist itself directly as a string.
+        time_step (str, optional): Value for the time step, used in the difference state equations. It is recommended to
+          pass it in exponential form (ex.: ``"2.5e-6"``) **Needs to be a string**, passing it as a float may cause
+          issues. Defaults to None.
+
+    Attributes:
+        components (list[Component]): List of components for the circuit.
+        currents (dict[str, sympy.Expr]): Dictionary that relates each component name to its currents. Does not include
+          trivial components, which are current sources and inductors.
+        component_voltages (dict[str, sympy.Expr]): Dictionary that relates each component name to its voltages. Does
+          not include trivial components, which are voltage sources and capacitors.
+        node_voltages (dict[str, sympy.Expr]): Dictionary that relates each node name to its voltages.
+        states (dict[str, sympy.Expr]): Dictionary that relates each energy storage component to its continuous state
+          equation. **It only includes the right hand side of the equation!**
+        forward (dict[str, sympy.Expr]): Dictionary that relates each energy storage component to its discrete state
+          equation, using the forward method. **It only includes the right hand side of the equation, WITHOUT THE
+          V_{n-1} / I_{n-1} ADDED TO IT!**
+        backward (dict[str, sympy.Expr]): Dictionary that relates each energy storage component to its discrete state
+          equation, using the backward method. **It only includes the right hand side of the equation, WITHOUT THE
+          V_{n-1} / I_{n-1} ADDED TO IT!**
+        trapezoidal (dict[str, sympy.Expr]): Dictionary that relates each energy storage component to its discrete state
+          equation, using the trapezoidal method. **It only includes the right hand side of the equation, WITHOUT THE
+          V_{n-1} / I_{n-1} ADDED TO IT!**
+    """
+
+    def __init__(self, netlist: str, time_step: str | None = None):
+        if os.path.exists(netlist):
+            netlist = get_lines(netlist)
         else:
-            circuit_data = circuit_data.strip().split("\n")
+            netlist = netlist.strip().split("\n")
 
-        self.components, possible_time_step = parse_components(circuit_data)
+        self.components, possible_time_step = parse_components(netlist)
         if not time_step and possible_time_step:
             time_step = possible_time_step
 
@@ -67,7 +100,7 @@ class Circuit:
         """Print all components for the circuit"""
         print(self._formatted_components)
 
-    def print_currents(self, *components):
+    def print_currents(self, *components: "Component"):
         """Prints the current for the given components (excluding inductors and current sources, which are obvious). If
         no components are given, prints the currents for *every* component.
 
@@ -76,7 +109,7 @@ class Circuit:
         """
         print(self._formatted_currents(components))
 
-    def print_component_voltages(self, *components):
+    def print_component_voltages(self, *components: "Component"):
         """Prints the voltage for the given components (excluding capacitors and voltage sources, which are obvious). If
         no components are given, prints the voltages for *every* component.
 
@@ -85,7 +118,7 @@ class Circuit:
         """
         print(self._formatted_component_voltages(components))
 
-    def print_node_voltages(self, *nodes):
+    def print_node_voltages(self, *nodes: str):
         """Prints the voltage for each node. If no nodes are given, prints the voltages for every node.
 
         Args:
@@ -93,7 +126,7 @@ class Circuit:
         """
         print(self._formatted_node_voltages(nodes))
 
-    def print_states(self, *components):
+    def print_states(self, *components: "Component"):
         """Prints the state equations for the system (continuous).
 
         Args:
@@ -101,7 +134,7 @@ class Circuit:
         """
         print(self._formatted_states(components))
 
-    def print_forward(self, *components):
+    def print_forward(self, *components: "Component"):
         """Prints the state equations for the system (forward).
 
         Args:
@@ -109,7 +142,7 @@ class Circuit:
         """
         print(self._formatted_forward(components))
 
-    def print_backward(self, *components):
+    def print_backward(self, *components: "Component"):
         """Prints the state equations for the system (backward).
 
         Args:
@@ -117,7 +150,7 @@ class Circuit:
         """
         print(self._formatted_backward(components))
 
-    def print_trapezoidal(self, *components):
+    def print_trapezoidal(self, *components: "Component"):
         """Prints the state equations for the system (trapezoidal).
 
         Args:

@@ -1,0 +1,14 @@
+\documentclass{standalone}
+\usepackage[siunitx, american]{circuitikz}
+
+\begin{document}
+\begin{circuitikz}[american]
+\draw
+  (3,0) node[ground] (gnd) {}                           % node 0
+  (0,3) node[circ,label=left:1] (n1) {}                 % node 1 (dot)
+    to[V,l_=$V1$, a^=10<\volt>] (0,0)
+  (n1) to[R,l=$R1$, a_=1<\kilo\ohm>] (3,3) node[circ,label=above:2] (n2) {}    % node 2 (dot)
+  (n2) to[L,l=$L1$, a_=100<\milli\henry>] (6,3) node[circ,label=right:3] (n3) {}    % node 3 (dot)
+  (n3) to[C,l=$C1$, a_=10<\micro\farad>] (6,0) {} -- (0,0);        % node 0 (dot)
+\end{circuitikz}
+\end{document}

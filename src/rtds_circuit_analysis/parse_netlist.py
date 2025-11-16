@@ -8,9 +8,20 @@ from rtds_circuit_analysis.utils import error_message
 
 
 class Component:
-    """Represents a component in a circuit"""
+    """Represents a component in a circuit. Mostly for internal use, although you can use it to extract the voltage and
+    current directly from a component.
 
-    def __init__(self, name: str, nodes: tuple, value):
+    Attributes:
+        name (str): The name of the component.
+        type (str): What type the component is ("V" for voltage sources, "R" for resistors, etc)
+        nodes (tuple[str]): The two nodes the component is connected to, in order
+        value (sympy.Rational | sympy.Symbol): The value for the component (Volts for voltage sources, Ohms for
+        resistors, etc)
+        current: The current calculated for the component
+        voltage: The voltage calculated for the component
+    """
+
+    def __init__(self, name: str, nodes: tuple[str], value: sp.Rational | sp.Symbol):
         self.name = name
         self.type = name[0]
         self.nodes = nodes
