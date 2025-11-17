@@ -20,7 +20,6 @@ pip install rtds-circuit-analysis
 
 ## Netlist
 
-<!-- TODO: Add references to the netlist docs in every bullet here, similar to quickstart.srt -->
 Before actually [using](#usage) this program, you will need to write the circuit you want to analise as a *netlist*.
 This software uses a netlist style similar to SPICE programs, where each line corresponds to each component in the
 circuit. They will be formatted like `VIN IN 0 V`, where:
@@ -31,7 +30,7 @@ circuit. They will be formatted like `VIN IN 0 V`, where:
 - The final word will be the value for the circuit. It can be a literal (such as in this case, `V`), a numeric value
   (like `10k`), or a combination of both (like `10VIN`).
 
-<!-- TODO: Link to the sphinx section about netlists here -->
+For more info on how to write your netlists, check out [here](https://rtds-circuit-analysis.readthedocs.io/en/stable/netlists.html)
 
 For example, here is a basic RLC circuit...
 
@@ -77,7 +76,7 @@ To take a look at every flag available, run the help command:
 rtds-circuit-analysis -h
 ```
 
-<!-- TODO: Link the section about the cli in the sphinx docs here -->
+For more info on how to use the cli, check out [here](https://rtds-circuit-analysis.readthedocs.io/en/stable/cli.html)
 
 ### Library
 
@@ -104,7 +103,7 @@ You can also use the `print` methods to print the solutions for the circuit in a
 circuit.print_component_voltages("R1", "R2")
 ```
 
-<!-- TODO: Link the section about the library in the sphinx docs here -->
+For more info on how to use the library, check out [here](https://rtds-circuit-analysis.readthedocs.io/en/stable/library.html)
 
 ## Output Examples
 
@@ -193,3 +192,6 @@ VC1_{n} = 25*IL1_{n-1}/3 + 11*VC1_{n-1}/12 + 5/6
 IL1_{n} = -17*IL1_{n-1}/25 - VC1_{n-1}/625 + 2/125
 VC1_{n} = 16*IL1_{n-1} + 23*VC1_{n-1}/25 + 4/5
 ```
+
+For more info on how to interpret the solutions, check out
+[here](https://rtds-circuit-analysis.readthedocs.io/en/stable/solutions.html)
