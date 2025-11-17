@@ -20,4 +20,8 @@ rtds-circuit-analysis = "rtds_cli.app:app"
 
 [project.urls]
 Homepage = "https://pypi.org/project/rtds-circuit-analysis/"
+Documentation = "https://rtds-circuit-analysis.readthedocs.io/en/latest/"
 Repository = "https://github.com/Guilherme-Natan/rtds-circuit-analysis"
+
+[project.optional-dependencies]
+dev = ["sphinx", "sphinx_rtd_theme", "sphinx-design", "sphinx-argparse", "pytest"]
