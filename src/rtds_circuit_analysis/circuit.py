@@ -49,9 +49,7 @@ class Circuit:
         else:
             netlist = netlist.strip().split("\n")
 
-        self.components, possible_time_step = parse_components(netlist)
-        if not time_step and possible_time_step:
-            time_step = possible_time_step
+        self.components, time_step = parse_components(netlist, time_step)
 
         parse_data(self.components)
 
