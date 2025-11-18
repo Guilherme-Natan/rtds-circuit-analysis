@@ -19,7 +19,7 @@ def check_for_errors(args: "argparse.Namespace", app_name: str):
 
     more_info = (
         f"For information on how to use this program, run the command \033[1m{app_name} -h\033[0m, and also look at the"
-        "README"
+        " README, and the docs: https://rtds-circuit-analysis.readthedocs.io/en/stable"
     )
     filepath = args.filepath
 
