@@ -145,7 +145,7 @@ def separate_line(line: str, num: int) -> tuple[str]:
     return words
 
 
-def parse_components(lines: list[str]) -> tuple[list[Component], bool]:
+def parse_components(lines: list[str], time_step: None | str) -> tuple[list[Component], bool]:
     """Turn the lines into component objects.
 
     Args:
@@ -160,13 +160,18 @@ def parse_components(lines: list[str]) -> tuple[list[Component], bool]:
     for line in lines:
         if len(line) >= 5 and line[:5].upper() == ".STEP":
             _, possible_time_step = separate_line(line, 2)
-            possible_time_step = parse_value(possible_time_step)
             continue
         name, node1, node2, value = separate_line(line, 4)
         name, node1, node2 = map(lambda x: x.upper(), (name, node1, node2))
         component = Component(name, (node1, node2), parse_value(value))
         components.append(component)
-    return components, possible_time_step
+
+    if time_step:
+        time_step = parse_value(time_step)
+    if possible_time_step:
+        time_step = parse_value(possible_time_step)
+
+    return components, time_step
 
 
 def extract_components(file_path: str) -> list[Component]:
