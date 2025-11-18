@@ -172,19 +172,3 @@ def parse_components(lines: list[str], time_step: None | str) -> tuple[list[Comp
         time_step = parse_value(possible_time_step)
 
     return components, time_step
-
-
-def extract_components(file_path: str) -> list[Component]:
-    """Extracts the components out of the .cir file.
-
-    Args:
-        file_path (str): The path of the .cir file.
-
-    Returns:
-        list[Component]: The list of components for the circuit.
-    """
-
-    lines = get_lines(file_path)
-    components = parse_components(lines)
-
-    return components
