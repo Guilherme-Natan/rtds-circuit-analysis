@@ -19,7 +19,7 @@ def error_message(error_msg: str):
     """Quits the program, displaying an error message first
 
     Args:
-        info (str): Info to display before leaving
+        error_msg (str): Info to display before leaving
     """
     print(f"\033[1mError\033[22m: {error_msg}")
     sys.exit(1)
