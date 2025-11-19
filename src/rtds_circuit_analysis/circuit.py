@@ -33,14 +33,11 @@ class Circuit:
         states (dict[str, sympy.Expr]): Dictionary that relates each energy storage component to its continuous state
           equation. **It only includes the right hand side of the equation!**
         forward (dict[str, sympy.Expr]): Dictionary that relates each energy storage component to its discrete state
-          equation, using the forward method. **It only includes the right hand side of the equation, WITHOUT THE
-          V_{n-1} / I_{n-1} ADDED TO IT!**
+          equation, using the forward method. **It only includes the right hand side of the equation!**
         backward (dict[str, sympy.Expr]): Dictionary that relates each energy storage component to its discrete state
-          equation, using the backward method. **It only includes the right hand side of the equation, WITHOUT THE
-          V_{n-1} / I_{n-1} ADDED TO IT!**
+          equation, using the backward method. **It only includes the right hand side of the equation!**
         trapezoidal (dict[str, sympy.Expr]): Dictionary that relates each energy storage component to its discrete state
-          equation, using the trapezoidal method. **It only includes the right hand side of the equation, WITHOUT THE
-          V_{n-1} / I_{n-1} ADDED TO IT!**
+          equation, using the trapezoidal method. **It only includes the right hand side of the equation!**
         time_step (sympy.Rational | None): The time step for the circuit.
     """
 
