@@ -31,7 +31,7 @@ def check_for_errors(args: "argparse.Namespace", app_name: str, circuit: "Circui
 
     more_info = (
         f"For information on how to use this program, run the command \033[1m{app_name} -h\033[0m, and also look at the"
-        " README, and the docs: https://rtds-circuit-analysis.readthedocs.io/en/stable"
+        " README, and the docs: https://rtds-circuit-analysis.readthedocs.io/en/stable."
     )
     full_error_message = partial(_full_error_message, more_info=more_info)
 
@@ -42,15 +42,15 @@ def check_for_errors(args: "argparse.Namespace", app_name: str, circuit: "Circui
 
     if not circuit.time_step:
         full_error_message(
-            "You need to supply the time step, with the '-T' flag",
+            "You need to supply the time step, with the '-T' flag.",
         )
     if not args.fixed:
         full_error_message(
-            "You need to supply the number of bits for the fixed point type, with the '-F' flag",
+            "You need to supply the number of bits for the fixed point type, with the '-F' flag.",
         )
     if not args.point:
         full_error_message(
-            "You need to supply the number of bits behind the point for the fixed point type, with the '-P' flag",
+            "You need to supply the number of bits behind the point for the fixed point type, with the '-P' flag.",
         )
 
     methods = [args.forward, args.backward, args.trapezoidal]
