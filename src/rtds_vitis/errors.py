@@ -35,6 +35,11 @@ def check_for_errors(args: "argparse.Namespace", app_name: str, circuit: "Circui
     )
     full_error_message = partial(_full_error_message, more_info=more_info)
 
+    if not circuit.states:
+        full_error_message(
+            f"The circuit '{args.filepath}' is stateless! No equations could be generated for it.",
+        )
+
     if not circuit.time_step:
         full_error_message(
             "You need to supply the time step, with the '-T' flag",
