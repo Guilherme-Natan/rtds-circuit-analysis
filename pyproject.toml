@@ -17,6 +17,7 @@ license-files = ["LICENSE"]
 
 [project.scripts]
 rtds-circuit-analysis = "rtds_cli.app:app"
+rtds-vitis = "rtds_vitis.app:app"
 
 [project.urls]
 Homepage = "https://pypi.org/project/rtds-circuit-analysis/"

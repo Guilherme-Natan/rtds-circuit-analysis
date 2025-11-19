@@ -6,6 +6,8 @@ from rtds_circuit_analysis.utils import error_message
 if TYPE_CHECKING:
     import argparse
 
+    from rtds_circuit_analysis import Circuit
+
 
 def _full_error_message(text: str, more_info: str):
     """Helper function for the full error message
@@ -18,12 +20,13 @@ def _full_error_message(text: str, more_info: str):
     error_message(f"{text}\n{more_info}")
 
 
-def check_for_errors(args: "argparse.Namespace", app_name: str):
+def check_for_errors(args: "argparse.Namespace", app_name: str, circuit: "Circuit"):
     """Check for errors for the arguments in the Vitis cli.
 
     Args:
         args (argparse.Namespace): The arguments given in the cli.
         app_name (str): The name for the program
+        circuit (list[sp.Expr]): List of states equations for the circuit
     """
 
     more_info = (
@@ -32,7 +35,7 @@ def check_for_errors(args: "argparse.Namespace", app_name: str):
     )
     full_error_message = partial(_full_error_message, more_info=more_info)
 
-    if not args.time_step:
+    if not circuit.time_step:
         full_error_message(
             "You need to supply the time step, with the '-T' flag",
         )
