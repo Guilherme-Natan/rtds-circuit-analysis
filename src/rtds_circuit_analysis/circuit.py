@@ -41,6 +41,7 @@ class Circuit:
         trapezoidal (dict[str, sympy.Expr]): Dictionary that relates each energy storage component to its discrete state
           equation, using the trapezoidal method. **It only includes the right hand side of the equation, WITHOUT THE
           V_{n-1} / I_{n-1} ADDED TO IT!**
+        time_step (sympy.Rational | None): The time step for the circuit.
     """
 
     def __init__(self, netlist: str, time_step: str | None = None):
@@ -50,6 +51,8 @@ class Circuit:
             netlist = netlist.strip().split("\n")
 
         self.components, time_step = parse_components(netlist, time_step)
+
+        self.time_step = time_step
 
         parse_data(self.components)
 
