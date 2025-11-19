@@ -1,10 +1,74 @@
 import sys
 from typing import TYPE_CHECKING
 
+import sympy as sp
+
 if TYPE_CHECKING:
     from argparse import Namespace
 
     from rtds_circuit_analysis import Circuit
+
+
+def get_equations(circuit: "Circuit", args: "Namespace") -> dict[str, sp.Eq]:
+    """Get the equations for the circuit, accordingly to the chosen method
+
+    Args:
+        circuit (Circuit): The circuit object.
+        args (Namespace): The command line arguments
+
+    Returns:
+        dict[str, sp.Eq]: The dict that relates each component to its sympy equation.
+    """
+    # Get expression for the method chosen
+    if args.forward:
+        expressions = circuit.forward
+    elif args.backward:
+        expressions = circuit.backward
+    else:
+        expressions = circuit.trapezoidal
+
+    # Generate the equations
+    equations = expressions.copy()
+    for component, expression in expressions.items():
+        # Generates the left hand side for the equation
+        lhs = component
+        match lhs[0]:
+            case "C":
+                lhs = "V" + lhs
+            case "L":
+                lhs = "I" + lhs
+        lhs += "_{n}"
+        lhs = sp.Symbol(lhs)
+
+        # Stores the equation in the dictionary
+        equations[component] = sp.Eq(lhs, expression)
+
+    return equations
+
+
+def get_parameters(equations: dict[str, sp.Eq]) -> list[str]:
+    """The parameter for the circuit, that is, the values for the resistors, capacitors and inductors that are literal,
+    instead of numeric.
+
+    Args:
+        equations (dict[str, sp.Eq]): Dict that relates each component to its equation.
+
+    Returns:
+        list[str]: List of parameters, where the values for resistors comes first, then inductors, and finally
+        capacitors.
+    """
+    # Get list of parameters from the equations (resistor, capacitor and inductors literal values)
+    parameters = set()
+    for equation in equations.values():
+        symbols = equation.free_symbols
+        parameters.update(str(symbol) for symbol in symbols if str(symbol)[0] in ("R", "C", "L"))
+    parameters = list(parameters)
+
+    # Sorts the list, r first, then l, then c
+    priority_rlc = {"R": 0, "L": 1, "C": 2}
+    parameters.sort(key=lambda symbol: (priority_rlc[symbol[0]], symbol))
+
+    return parameters
 
 
 def get_cpp_headers(fixed: str, point: str) -> str:
@@ -36,6 +100,10 @@ def print_vitis_code(circuit: "Circuit", args: "Namespace"):
 
     # C headers
     code = get_cpp_headers(args.fixed, args.point)
+
+    # Find the equations that generate the circuit, and its parameters
+    equations = get_equations(circuit, args)
+    parameters = get_parameters(equations)
 
     print(code)
 
