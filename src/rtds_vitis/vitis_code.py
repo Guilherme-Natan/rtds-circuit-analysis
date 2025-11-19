@@ -1,3 +1,4 @@
+import sys
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -37,3 +38,10 @@ def print_vitis_code(circuit: "Circuit", args: "Namespace"):
     code = get_cpp_headers(args.fixed, args.point)
 
     print(code)
+
+    if parameters:
+        print(
+            "\033[33mWARNING: Components with literal values found. You'll need to replace all the "
+            "'CHANGEME's in the cpp code with their respective numeric values\033[0m",
+            file=sys.stderr,
+        )
