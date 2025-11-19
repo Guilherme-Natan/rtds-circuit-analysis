@@ -90,6 +90,25 @@ def get_cpp_headers(fixed: str, point: str) -> str:
     )
 
 
+def get_cpp_parameters(parameters: list[str]) -> str:
+    """Transforms the list of parameters into a list of "#define"s in cpp, so the user can manually change it later.
+
+    Args:
+        parameters (list[str]): _description_
+
+    Returns:
+        str: _description_
+    """
+
+    max_whitespaces = 1 + max(len(parameter) for parameter in parameters)
+    output = "\n"
+    for parameter in parameters:
+        whitespaces = " " * (max_whitespaces - len(parameter))
+        output += f"#define {parameter}{whitespaces}data_t(CHANGEME)\n"
+
+    return output
+
+
 def print_vitis_code(circuit: "Circuit", args: "Namespace"):
     """Prints the cpp vitis code, for implementing the circuit in an FPGA.
 
@@ -104,6 +123,10 @@ def print_vitis_code(circuit: "Circuit", args: "Namespace"):
     # Find the equations that generate the circuit, and its parameters
     equations = get_equations(circuit, args)
     parameters = get_parameters(equations)
+
+    # Generate CHANGEME data_t entries when some component values are literals
+    if parameters:
+        code += get_cpp_parameters(parameters)
 
     print(code)
 
