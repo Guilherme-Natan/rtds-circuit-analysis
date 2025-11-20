@@ -16,7 +16,7 @@ class Component:
         type (str): What type the component is ("V" for voltage sources, "R" for resistors, etc)
         nodes (tuple[str]): The two nodes the component is connected to, in order
         value (sympy.Rational | sympy.Symbol): The value for the component (Volts for voltage sources, Ohms for
-        resistors, etc)
+          resistors, etc)
         current: The current calculated for the component
         voltage: The voltage calculated for the component
     """
