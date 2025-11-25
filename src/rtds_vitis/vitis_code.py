@@ -1,5 +1,6 @@
 import sys
 from os.path import basename, splitext
+from textwrap import indent
 from typing import TYPE_CHECKING
 
 import sympy as sp
@@ -8,6 +9,18 @@ if TYPE_CHECKING:
     from argparse import Namespace
 
     from rtds_circuit_analysis import Circuit
+
+
+def indent1(string: str) -> str:
+    """Indent string one time
+
+    Args:
+        string (str): The unindented string
+
+    Returns:
+        str: The string, indented one time
+    """
+    return indent(string, 4 * " ")
 
 
 def get_equations(circuit: "Circuit", args: "Namespace") -> dict[str, sp.Eq]:
@@ -139,7 +152,7 @@ def get_inputs_and_states(equations: dict[str, sp.Eq]) -> tuple[list[str], list[
             i = i[:-4]
         else:
             i = i[:-6]
-            inputs_no_subscripts.add(i)
+        inputs_no_subscripts.add(i)
 
     inputs = sorted(list(inputs_no_subscripts))
     return inputs, states
@@ -170,7 +183,174 @@ def define_function(filepath: str, inputs: list[str], states: list[str]) -> str:
     for s in states:
         parsed_states += f" data_t *{s},"
 
-    return f"\nvoid {name}(uint1_t sinc,{parsed_inputs}{parsed_states})" + "{"
+    return f"\nvoid {name}(uint1_t sinc,{parsed_inputs}{parsed_states})" + "{\n"
+
+
+def define_states(states: list[str]) -> str:
+    """Declares the states that will be used by Vitis.
+
+    Args:
+        states (list[str]): The states to be used.
+
+    Returns:
+        str: The declaration of the states.
+    """
+    code = "\n"
+    for state in states:
+        code += f"static data_t {state}_old = 0;\n"
+        code += f"static data_t {state}_new = 0;\n"
+    return code
+
+
+def define_inputs(inputs):
+    """Declares the "old" (n-1) inputs that will be used by Vitis. Only necessary for the forward and trapezoidal
+    method.
+
+    Args:
+        inputs (list[str]): The inputs to be used.
+
+    Returns:
+        str: The declaration of the "old" inputs.
+    """
+    code = "\n"
+    for i in inputs:
+        code += f"static data_t {i}_old = 0;\n"
+    return code
+
+
+def pass_states_new_old(states: list[str]) -> str:
+    """Sets the old calculated states
+
+    Args:
+        states (list[str]): List of states
+
+    Returns:
+        str: Code the sets the old calculated states
+    """
+    code = "\n"
+    for state in states:
+        code += f"{state}_old = {state}_new;\n"
+    return code
+
+
+def pass_inputs_new_old(inputs):
+    """Pass the current inputs to the old ones, to be used in the next iteration. Only necessary for the forward and
+    trapezoidal method.
+
+    Args:
+        inputs (list[str]): The inputs to be used.
+
+    Returns:
+        str: The code that sets the "old" inputs.
+    """
+    code = "\n"
+    for i in inputs:
+        code += f"{i}_old = {i};\n"
+    return code
+
+
+def python_cpp_table(variables: list[str], is_input=False) -> dict[sp.Symbol, sp.Symbol]:
+    """Creates a table that relates the name of each symbol in python's sympy, to how it should be called in cpp.
+
+    Args:
+        variables (list[str]): Symbols to add to the table
+        is_input (bool, optional): If the symbols are inputs. Defaults to False.
+
+    Returns:
+        dict[sp.Symbol, sp.Symbol]: The table that relates python and cpp symbols.
+    """
+
+    table = {}
+    if is_input:
+        new_appendix = ""
+    else:
+        new_appendix = "_new"
+
+    sym = sp.Symbol
+    for variable in variables:
+        table[sym(variable + "_{n-1}")] = sym(variable + "_old")
+        table[sym(variable + "_{n}")] = sym(variable + new_appendix)
+
+    return table
+
+
+def format_equations(equations: list[sp.Eq], states: list[str], inputs: list[str]) -> str:
+    """Format the sympy equations to the cpp file format.
+
+    Args:
+        equations (list[sp.Eq]): Equations to format.
+        states (list[str]): States for the circuit.
+        inputs (list[str]): Inputs for the circuit.
+
+    Returns:
+        str: Formatted equations.
+    """
+    states_table = python_cpp_table(states)
+    inputs_table = python_cpp_table(inputs, is_input=True)
+    subs_table = states_table | inputs_table
+
+    code = "\n"
+    for equation in equations.values():
+        equation = equation.subs(subs_table)
+        code += f"{equation.lhs} = {equation.rhs}\n"
+
+    return code
+
+
+def rt_simulation(equations: list[sp.Eq], states: list[str], inputs: list[str], is_backward: bool) -> str:
+    """Writes the code that is mostly responsible to simulate the circuit.
+
+    Args:
+        equations (list[sp.Eq]): State equations for the circuit.
+        states (list[str]): States for the circuit.
+        inputs (list[str]): Inputs for the circuit.
+        is_backward (bool): If the method chosen to convert the state equations to discrete form is the backward one.
+
+    Returns:
+        str: The code that simulates the circuit.
+    """
+    code = "\naux_sinc = sinc;\n"
+
+    code += pass_states_new_old(states)
+
+    code += format_equations(equations, states, inputs)
+
+    if not is_backward:
+        code += pass_inputs_new_old(inputs)
+    return code
+
+
+def if_else(rt_code: str) -> str:
+    """Writes the "if else" that goes inside the main function
+
+    Args:
+        rt_code (str): The code that goes inside the "else"
+
+    Returns:
+        str: The completed "if else"
+    """
+    code = "\n"
+    code += "if(aux_sinc == sinc){\n}\n"
+
+    code += "else{\n"
+    code += indent1(rt_code)
+    code += "\n}\n"
+    return code
+
+
+def pass_states_new_out(states: list[str]) -> str:
+    """Pass the new calculated states to the pointers (the FPGA outputs)
+
+    Args:
+        states (list[str]): List of states
+
+    Returns:
+        str: Code the passes the calculated states to the pointers
+    """
+    code = "\n"
+    for state in states:
+        code += f"*{state} = {state}_new;\n"
+    return code
 
 
 def main_function(equations: dict[str, sp.Eq], args: "Namespace") -> str:
@@ -187,10 +367,32 @@ def main_function(equations: dict[str, sp.Eq], args: "Namespace") -> str:
     inputs, states = get_inputs_and_states(equations)
 
     # Starts the main function
-    code = define_function(args.filepath, inputs, states)
+    def_fun = define_function(args.filepath, inputs, states)
+
+    code = "\n"
+    # Define the aux_sinc, for synchronizing the FPGA simulation
+    code += "static uint1_t aux_sinc;" + "\n"
+
+    # Define the states
+    code += define_states(states)
+
+    # Define the "n-1" input variables (not necessary in the backwards method)
+    if not args.backward:
+        code += define_inputs(inputs)
+
+    # Writes the code that will actually perform the RT simulation
+    rt_code = rt_simulation(equations, states, inputs, args.backward)
+    code += if_else(rt_code)
+
+    # Pass the states as outputs for the FPGA
+    code += pass_states_new_out(states)
+
+    # Adds the function declaration to the code, and idents everything
+    code = f"{def_fun}{indent1(code)}"
 
     # Closes the main function
     code += "\n}"
+
     return code
 
 
