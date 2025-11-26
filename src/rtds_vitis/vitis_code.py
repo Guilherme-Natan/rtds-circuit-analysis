@@ -174,16 +174,12 @@ def define_function(filepath: str, inputs: list[str], states: list[str]) -> str:
     name = splitext(basename(filepath))[0]
 
     # Write the inputs as parameters for the function
-    parsed_inputs = ""
-    for i in inputs:
-        parsed_inputs += f" data_t {i},"
+    parsed_inputs = ", ".join(f"data_t {i}" for i in inputs)
 
     # Write the inputs as parameters for the function
-    parsed_states = ""
-    for s in states:
-        parsed_states += f" data_t *{s},"
+    parsed_states = ", ".join(f"data_t *{s}" for s in states)
 
-    return f"\nvoid {name}(uint1_t sinc,{parsed_inputs}{parsed_states})" + "{\n"
+    return f"\nvoid {name}(uint1_t sinc, {parsed_inputs}, {parsed_states})" + "{\n"
 
 
 def define_states(states: list[str]) -> str:
@@ -292,7 +288,7 @@ def format_equations(equations: list[sp.Eq], states: list[str], inputs: list[str
     code = "\n"
     for equation in equations.values():
         equation = equation.subs(subs_table)
-        code += f"{equation.lhs} = {equation.rhs}\n"
+        code += f"{equation.lhs} = {equation.rhs};\n"
 
     return code
 
