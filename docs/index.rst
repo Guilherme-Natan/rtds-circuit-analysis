@@ -25,3 +25,4 @@ RTDS Circuit Analysis documentation
    solutions
    cli
    library
+   vitis
