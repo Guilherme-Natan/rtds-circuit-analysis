@@ -103,9 +103,9 @@ def find_loop_equations(loops: list[list[Component]]) -> list[sp.Expr]:
         loop_equation = 0
         for component, polarity in zip(loop, polarity_sequence):
             if component.type == "R":
-                loop_equation -= component.value * component.current * polarity
+                loop_equation += component.value * component.current * polarity
             else:
-                loop_equation -= component.voltage * polarity
+                loop_equation += component.voltage * polarity
         loop_equations.append(loop_equation)
     return loop_equations
 
