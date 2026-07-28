@@ -44,13 +44,13 @@ def check_for_errors(args: "argparse.Namespace", app_name: str, circuit: "Circui
         full_error_message(
             "You need to supply the time step, with the '-T' flag.",
         )
-    if not args.fixed:
+    if args.fixed <= 0:
         full_error_message(
-            "You need to supply the number of bits for the fixed point type, with the '-F' flag.",
+            "The total number of bits supplied with '-F' must be greater than zero.",
         )
-    if not args.point:
+    if args.point < 0:
         full_error_message(
-            "You need to supply the number of bits behind the point for the fixed point type, with the '-P' flag.",
+            "The number of bits after the binary point supplied with '-P' cannot be negative.",
         )
 
     methods = [args.forward, args.backward, args.trapezoidal]

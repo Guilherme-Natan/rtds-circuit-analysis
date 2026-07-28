@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rtds-circuit-analysis"
-version = "0.2.0"
+version = "0.3.0"
 authors = [
   { name="Guilherme Natan", email="guilherme.natan.braga@gmail.com" },
 ]
@@ -21,7 +21,7 @@ rtds-vitis = "rtds_vitis.app:app"
 
 [project.urls]
 Homepage = "https://pypi.org/project/rtds-circuit-analysis/"
-Documentation = "https://rtds-circuit-analysis.readthedocs.io/en/latest/"
+Documentation = "https://rtds-circuit-analysis.readthedocs.io/en/stable/"
 Repository = "https://github.com/Guilherme-Natan/rtds-circuit-analysis"
 
 [project.optional-dependencies]

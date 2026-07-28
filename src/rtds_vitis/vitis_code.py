@@ -11,6 +11,11 @@ if TYPE_CHECKING:
     from rtds_circuit_analysis import Circuit
 
 
+CPP_MAX_LINE_LENGTH = 80
+CPP_INDENT_SIZE = 4
+CPP_BODY_LINE_LENGTH = CPP_MAX_LINE_LENGTH - CPP_INDENT_SIZE
+
+
 def indent1(string: str) -> str:
     """Indent string one time
 
@@ -21,6 +26,76 @@ def indent1(string: str) -> str:
         str: The string, indented one time
     """
     return indent(string, 4 * " ")
+
+
+def _find_break_position(text: str, limit: int) -> int | None:
+    """Find a position where a C++ statement can be split safely."""
+
+    whitespace_position = None
+    operator_position = None
+
+    for position, character in enumerate(text[:limit]):
+        if character.isspace():
+            whitespace_position = position
+        elif character in ",+*/=":
+            operator_position = position + 1
+        elif character == "-":
+            is_exponent_sign = (
+                position > 0 and text[position - 1] in ("e", "E")
+            )
+            if not is_exponent_sign:
+                operator_position = position + 1
+
+    positions = [
+        position
+        for position in (whitespace_position, operator_position)
+        if position is not None
+    ]
+    return max(positions, default=None)
+
+
+def wrap_cpp_statement(
+    statement: str,
+    width: int = CPP_BODY_LINE_LENGTH,
+) -> str:
+    """Wrap a C++ statement without changing its meaning."""
+
+    lines = []
+    remaining = statement
+    continuation = ""
+
+    while len(continuation + remaining) > width:
+        available = width - len(continuation)
+        break_position = _find_break_position(remaining, available)
+
+        # A single identifier or literal cannot be split safely.
+        if break_position is None:
+            lines.append(continuation + remaining)
+            return "\n".join(lines)
+
+        current = remaining[:break_position].rstrip()
+        remaining = remaining[break_position:].lstrip()
+        lines.append(continuation + current)
+        continuation = " " * CPP_INDENT_SIZE
+
+    lines.append(continuation + remaining)
+    return "\n".join(lines)
+
+
+def _cpp_statement(statement: str) -> str:
+    """Format a statement that will be indented inside the top function."""
+
+    return wrap_cpp_statement(statement) + "\n"
+
+
+def get_discretization_method(args: "Namespace") -> str:
+    """Return the name of the selected discretization method."""
+
+    if args.forward:
+        return "forward"
+    if args.backward:
+        return "backward"
+    return "trapezoidal"
 
 
 def get_equations(circuit: "Circuit", args: "Namespace") -> dict[str, sp.Eq]:
@@ -85,23 +160,27 @@ def get_parameters(equations: dict[str, sp.Eq]) -> list[str]:
     return parameters
 
 
-def get_cpp_headers(fixed: str, point: str) -> str:
+def get_cpp_headers(fixed: int, point: int) -> str:
     """Layout the required information at the start of every vitis cpp file.
 
     Args:
-        fixed (str): Number of bits the fixed point representation should have.
-        point (str): Number of bits behind the point the fixed point representation should have (including the sign).
+        fixed (int): Total number of bits in the fixed-point representation.
+        point (int): Number of bits after the binary point.
 
     Returns:
         str: The cpp header
     """
 
-    return (
-        "#include <ap_fixed.h>\n"
-        "#include <ap_int.h>\n"
-        f"typedef ap_fixed<{fixed}, {point}, AP_TRN, AP_WRAP> data_t;\n"
-        "typedef ap_uint<1> uint1_t;\n"
+    integer_bits = int(fixed) - int(point)
+
+    fixed_type = (
+        f"typedef ap_fixed<{fixed}, {integer_bits}, "
+        "AP_TRN, AP_WRAP> data_t;"
     )
+    return "#include <ap_fixed.h>\n" + wrap_cpp_statement(
+        fixed_type,
+        width=CPP_MAX_LINE_LENGTH,
+    ) + "\n"
 
 
 def get_cpp_parameters(parameters: list[str]) -> str:
@@ -114,11 +193,18 @@ def get_cpp_parameters(parameters: list[str]) -> str:
         str: _description_
     """
 
-    max_whitespaces = 1 + max(len(parameter) for parameter in parameters)
     output = "\n"
     for parameter in parameters:
-        whitespaces = " " * (max_whitespaces - len(parameter))
-        output += f"#define {parameter}{whitespaces}data_t(CHANGEME)\n"
+        definition = f"#define {parameter} data_t(CHANGEME)"
+        if len(definition) <= CPP_MAX_LINE_LENGTH:
+            output += definition + "\n"
+        else:
+            output += "#define \\\n"
+            parameter_line = f"{parameter} \\"
+            if len(parameter_line) > CPP_MAX_LINE_LENGTH:
+                parameter_line = f"{parameter}\\"
+            output += parameter_line + "\n"
+            output += "    data_t(CHANGEME)\n"
 
     return output
 
@@ -158,28 +244,43 @@ def get_inputs_and_states(equations: dict[str, sp.Eq]) -> tuple[list[str], list[
     return inputs, states
 
 
-def define_function(filepath: str, inputs: list[str], states: list[str]) -> str:
+def define_function(
+    filepath: str,
+    inputs: list[str],
+    states: list[str],
+    method: str,
+) -> str:
     """Defines the function used in by the Vitis Software for the RT Simulation.
 
     Args:
         filepath (str): The path for the netlist file
         inputs (list[str]): The inputs for the function
         states (list[str]): The states for the function
+        method (str): The discretization method used by the function
 
     Returns:
         str: The statement that defines the function
     """
 
     # Takes only the basename (without extension) for the name for the function
-    name = splitext(basename(filepath))[0]
+    name = f"{splitext(basename(filepath))[0]}_{method}"
 
     # Write the inputs as parameters for the function
-    parsed_inputs = ", ".join(f"data_t {i}" for i in inputs)
+    parameters = [f"data_t {input_name}" for input_name in inputs]
 
-    # Write the inputs as parameters for the function
-    parsed_states = ", ".join(f"data_t *{s}" for s in states)
+    # Write the states as output pointer parameters for the function
+    parameters.extend(f"data_t *{state}" for state in states)
 
-    return f"\nvoid {name}(uint1_t sinc, {parsed_inputs}, {parsed_states})" + "{\n"
+    one_line = f"void {name}({', '.join(parameters)}){{"
+    if len(one_line) <= CPP_MAX_LINE_LENGTH:
+        return "\n" + one_line + "\n"
+
+    code = f"\nvoid {name}(\n"
+    for position, parameter in enumerate(parameters):
+        comma = "," if position < len(parameters) - 1 else ""
+        code += f"    {parameter}{comma}\n"
+    code += "){\n"
+    return code
 
 
 def define_states(states: list[str]) -> str:
@@ -191,10 +292,10 @@ def define_states(states: list[str]) -> str:
     Returns:
         str: The declaration of the states.
     """
-    code = "\n"
+    code = ""
     for state in states:
-        code += f"static data_t {state}_old = 0;\n"
-        code += f"static data_t {state}_new = 0;\n"
+        code += _cpp_statement(f"static data_t {state}_old = 0;")
+        code += _cpp_statement(f"static data_t {state}_new = 0;")
     return code
 
 
@@ -210,7 +311,7 @@ def define_inputs(inputs):
     """
     code = "\n"
     for i in inputs:
-        code += f"static data_t {i}_old = 0;\n"
+        code += _cpp_statement(f"static data_t {i}_old = 0;")
     return code
 
 
@@ -225,7 +326,7 @@ def pass_states_new_old(states: list[str]) -> str:
     """
     code = "\n"
     for state in states:
-        code += f"{state}_old = {state}_new;\n"
+        code += _cpp_statement(f"{state}_old = {state}_new;")
     return code
 
 
@@ -241,7 +342,7 @@ def pass_inputs_new_old(inputs):
     """
     code = "\n"
     for i in inputs:
-        code += f"{i}_old = {i};\n"
+        code += _cpp_statement(f"{i}_old = {i};")
     return code
 
 
@@ -288,7 +389,7 @@ def format_equations(equations: list[sp.Eq], states: list[str], inputs: list[str
     code = "\n"
     for equation in equations.values():
         equation = equation.subs(subs_table)
-        code += f"{equation.lhs} = {equation.rhs};\n"
+        code += _cpp_statement(f"{equation.lhs} = {equation.rhs};")
 
     return code
 
@@ -305,32 +406,12 @@ def rt_simulation(equations: list[sp.Eq], states: list[str], inputs: list[str], 
     Returns:
         str: The code that simulates the circuit.
     """
-    code = "\naux_sinc = sinc;\n"
-
-    code += pass_states_new_old(states)
+    code = pass_states_new_old(states)
 
     code += format_equations(equations, states, inputs)
 
     if not is_backward:
         code += pass_inputs_new_old(inputs)
-    return code
-
-
-def if_else(rt_code: str) -> str:
-    """Writes the "if else" that goes inside the main function
-
-    Args:
-        rt_code (str): The code that goes inside the "else"
-
-    Returns:
-        str: The completed "if else"
-    """
-    code = "\n"
-    code += "if(aux_sinc == sinc){\n}\n"
-
-    code += "else{\n"
-    code += indent1(rt_code)
-    code += "\n}\n"
     return code
 
 
@@ -345,7 +426,7 @@ def pass_states_new_out(states: list[str]) -> str:
     """
     code = "\n"
     for state in states:
-        code += f"*{state} = {state}_new;\n"
+        code += _cpp_statement(f"*{state} = {state}_new;")
     return code
 
 
@@ -363,12 +444,10 @@ def main_function(equations: dict[str, sp.Eq], args: "Namespace") -> str:
     inputs, states = get_inputs_and_states(equations)
 
     # Starts the main function
-    def_fun = define_function(args.filepath, inputs, states)
+    method = get_discretization_method(args)
+    def_fun = define_function(args.filepath, inputs, states, method)
 
     code = "\n"
-    # Define the aux_sinc, for synchronizing the FPGA simulation
-    code += "static uint1_t aux_sinc;" + "\n"
-
     # Define the states
     code += define_states(states)
 
@@ -378,7 +457,7 @@ def main_function(equations: dict[str, sp.Eq], args: "Namespace") -> str:
 
     # Writes the code that will actually perform the RT simulation
     rt_code = rt_simulation(equations, states, inputs, args.backward)
-    code += if_else(rt_code)
+    code += rt_code
 
     # Pass the states as outputs for the FPGA
     code += pass_states_new_out(states)
@@ -392,12 +471,15 @@ def main_function(equations: dict[str, sp.Eq], args: "Namespace") -> str:
     return code
 
 
-def print_vitis_code(circuit: "Circuit", args: "Namespace"):
-    """Prints the cpp vitis code, for implementing the circuit in an FPGA.
+def generate_vitis_code(circuit: "Circuit", args: "Namespace") -> str:
+    """Generate C++ code for implementing the circuit in an FPGA.
 
     Args:
         circuit (Circuit): The circuit's class
         args (Namespace): The arguments for the rtds-vitis command line code
+
+    Returns:
+        str: The generated C++ code.
     """
 
     # C headers
@@ -414,8 +496,17 @@ def print_vitis_code(circuit: "Circuit", args: "Namespace"):
     # Write the main function
     code += main_function(equations, args)
 
-    # Prints resulting code
+    return code
+
+
+def print_vitis_code(circuit: "Circuit", args: "Namespace"):
+    """Print the generated Vitis HLS C++ code."""
+
+    code = generate_vitis_code(circuit, args)
     print(code)
+
+    equations = get_equations(circuit, args)
+    parameters = get_parameters(equations)
     if parameters:
         print(
             "\n\033[33mWARNING: Components with literal values found. You'll need to replace all the "

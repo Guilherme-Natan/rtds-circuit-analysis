@@ -7,9 +7,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "RTDS Circuit Analysis"
-copyright = "2025, Guilherme Natan Ferro Braga"
+copyright = "2025-2026, Guilherme Natan Ferro Braga"
 author = "Guilherme Natan Ferro Braga"
-release = "2025-11-11"
+release = "0.3.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

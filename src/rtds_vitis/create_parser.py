@@ -14,7 +14,10 @@ def create_parser():
             'If you want to output it to a file, it is recommended to use the ">" output redirect operator. '
             "See the docs for more details: https://rtds-circuit-analysis.readthedocs.io/en/stable/vitis.html"
         ),
-        usage="%(prog)s [netlist.cir] [-T [TIMESTEP]] [-F [FIXED_BITS]] [-P [POINT_BITS]] (-f | -b | -t)",
+        usage=(
+            "%(prog)s [netlist.cir] [-T [TIMESTEP]] "
+            "[-F BITS] [-P BITS] (-f | -b | -t)"
+        ),
     )
     parser.add_argument(
         "filepath",
@@ -23,9 +26,9 @@ def create_parser():
         help="Path for the netlist",
     )
 
-    requiredNamed = parser.add_argument_group("Required Named Arguments")
+    code_generation = parser.add_argument_group("Code Generation Arguments")
 
-    requiredNamed.add_argument(
+    code_generation.add_argument(
         "-T",
         "--time-step",
         nargs="?",
@@ -33,20 +36,28 @@ def create_parser():
         help="Sets the time step used in the simulation. Not necessary if .STEP is set in the netlist.",
     )
 
-    requiredNamed.add_argument(
+    code_generation.add_argument(
         "-F",
         "--fixed",
-        nargs="?",
+        type=int,
+        default=32,
         metavar="BITS",
-        help="Number of bits allocated to the fixed number type, in total",
+        help=(
+            "Total number of bits allocated to the fixed-point type "
+            "(default: %(default)s)"
+        ),
     )
 
-    requiredNamed.add_argument(
+    code_generation.add_argument(
         "-P",
         "--point",
-        nargs="?",
+        type=int,
+        default=28,
         metavar="BITS",
-        help="Number of bits before the point, **including** the sign bit",
+        help=(
+            "Number of bits after the binary point "
+            "(default: %(default)s)"
+        ),
     )
 
     oneAndOnlyONe = parser.add_argument_group(
