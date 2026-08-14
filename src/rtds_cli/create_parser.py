@@ -2,6 +2,8 @@
 
 import argparse
 
+from rtds_circuit_analysis.version import __version__
+
 
 def create_parser():
     """Creates the parser for the cli.
@@ -30,12 +32,18 @@ def create_parser():
     )
 
     parser.add_argument(
-        "-v",
         "--component-voltages",
         nargs="*",
         metavar="COMPONENTS",
         help="Prints the voltages for each of the COMPONENTS. If COMPONENTS are not specified, prints the voltage drops"
         "across all components",
+    )
+
+    parser.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
 
     parser.add_argument(

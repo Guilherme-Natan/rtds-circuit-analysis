@@ -9,7 +9,7 @@
 project = "RTDS Circuit Analysis"
 copyright = "2025-2026, Guilherme Natan Ferro Braga"
 author = "Guilherme Natan Ferro Braga"
-release = "0.3.0"
+release = "0.3.1"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
