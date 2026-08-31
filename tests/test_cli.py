@@ -16,7 +16,7 @@ class TestVersionArguments(unittest.TestCase):
             with redirect_stdout(output):
                 parser.parse_args([flag])
 
-        self.assertEqual(output.getvalue(), f"{command} 0.3.1\n")
+        self.assertEqual(output.getvalue(), f"{command} 0.3.2\n")
 
     def test_circuit_analysis_version_arguments(self):
         for flag in ("-v", "--version"):

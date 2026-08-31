@@ -82,7 +82,7 @@ def parse_value(value: str) -> sp.Expr:
     """
     # If it begins with a letter, returns it as a Sympy Symbol
     if value[0].isalpha():
-        return sp.Symbol(value)
+        return sp.Symbol(value.upper())
 
     # Splits the value between the number part, and the rest (including SI prefix)
     match = re.search(r"[\d\.\-+eE]+", value)
@@ -101,7 +101,7 @@ def parse_value(value: str) -> sp.Expr:
 
     if not value_rest:
         return sp.Rational(value_number_part) * si_multiplier
-    return sp.Rational(value_number_part) * si_multiplier * sp.Symbol(value_rest)
+    return sp.Rational(value_number_part) * si_multiplier * sp.Symbol(value_rest.upper())
 
 
 def get_lines(file_name: str) -> list[str]:

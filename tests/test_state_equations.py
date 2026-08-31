@@ -16,7 +16,7 @@ class TestResistiveCircuits(_AssertResults):
     """Tests for purely resistive circuits"""
 
     def test_voltage_source(self):
-        Vin, R1 = sp.symbols("Vin R1")
+        Vin, R1 = sp.symbols("VIN R1")
 
         correct_values = _CorrectValues()
         correct_values.states = {}
@@ -33,7 +33,7 @@ class TestResistiveCircuits(_AssertResults):
         self._assert_all_results_equal(inspect.currentframe().f_code.co_name, correct_values)
 
     def test_current_source(self):
-        Iin, R1 = sp.symbols("Iin R1")
+        Iin, R1 = sp.symbols("IIN R1")
 
         correct_values = _CorrectValues()
         correct_values.states = {}
@@ -50,7 +50,7 @@ class TestResistiveCircuits(_AssertResults):
         self._assert_all_results_equal(inspect.currentframe().f_code.co_name, correct_values)
 
     def test_voltage_divider(self):
-        Vin, R1, R2 = sp.symbols("Vin R1 R2")
+        Vin, R1, R2 = sp.symbols("VIN R1 R2")
 
         correct_values = _CorrectValues()
         correct_values.states = {}
@@ -71,7 +71,7 @@ class TestResistiveCircuits(_AssertResults):
 
     def test_voltage_divider_var_1(self):
         # Inverted Voltage Source
-        Vin, R1, R2 = sp.symbols("Vin R1 R2")
+        Vin, R1, R2 = sp.symbols("VIN R1 R2")
 
         correct_values = _CorrectValues()
         correct_values.states = {}
@@ -92,7 +92,7 @@ class TestResistiveCircuits(_AssertResults):
 
     def test_voltage_divider_var_2(self):
         # Inverted R1 Resistor
-        Vin, R1, R2 = sp.symbols("Vin R1 R2")
+        Vin, R1, R2 = sp.symbols("VIN R1 R2")
 
         correct_values = _CorrectValues()
         correct_values.states = {}
@@ -112,7 +112,7 @@ class TestResistiveCircuits(_AssertResults):
         self._assert_all_results_equal(inspect.currentframe().f_code.co_name, correct_values)
 
     def test_current_divider(self):
-        Iin, R1, R2 = sp.symbols("Iin R1 R2")
+        Iin, R1, R2 = sp.symbols("IIN R1 R2")
 
         correct_values = _CorrectValues()
         correct_values.states = {}
@@ -132,7 +132,7 @@ class TestResistiveCircuits(_AssertResults):
 
     def test_current_divider_var_1(self):
         # Inverted Current Source
-        Iin, R1, R2 = sp.symbols("Iin R1 R2")
+        Iin, R1, R2 = sp.symbols("IIN R1 R2")
 
         correct_values = _CorrectValues()
         correct_values.states = {}
@@ -152,7 +152,7 @@ class TestResistiveCircuits(_AssertResults):
 
     def test_current_divider_var_2(self):
         # Inverted R1 Resistor
-        Iin, R1, R2 = sp.symbols("Iin R1 R2")
+        Iin, R1, R2 = sp.symbols("IIN R1 R2")
 
         correct_values = _CorrectValues()
         correct_values.states = {}
@@ -171,7 +171,7 @@ class TestResistiveCircuits(_AssertResults):
         self._assert_all_results_equal(inspect.currentframe().f_code.co_name, correct_values)
 
     def test_series_parallel_voltage_source(self):
-        Vin = sp.Symbol("Vin")
+        Vin = sp.Symbol("VIN")
 
         correct_values = _CorrectValues()
         correct_values.states = {}
@@ -294,7 +294,7 @@ class TestResistiveCircuits(_AssertResults):
     # 0 ohms resistor. The 2 following tests show this.
 
     def test_shorted_current_source(self):
-        Iin = sp.symbols("Iin")
+        Iin = sp.symbols("IIN")
 
         correct_values = _CorrectValues()
         correct_values.states = {}
@@ -384,7 +384,7 @@ class TestResistiveCircuits(_AssertResults):
         self._assert_all_results_equal(inspect.currentframe().f_code.co_name, correct_values)
 
     def test_open_voltage_source(self):
-        Vin, R1, R2, Va = sp.symbols("Vin R1 R2 Va")
+        Vin, R1, R2, Va = sp.symbols("VIN R1 R2 VA")
 
         correct_values = _CorrectValues()
         correct_values.states = {}
@@ -510,7 +510,7 @@ class TestStateEquations(_AssertResults):
         self._assert_all_results_equal(inspect.currentframe().f_code.co_name, correct_values)
 
     def test_state_equations_2(self):
-        Vin, R1, L1, R2, L2, R3, L3, C1, C2 = sp.symbols("Vin R1 L1 R2 L2 R3 L3 C1 C2")
+        Vin, R1, L1, R2, L2, R3, L3, C1, C2 = sp.symbols("VIN R1 L1 R2 L2 R3 L3 C1 C2")
         IL1, IL2, IL3, VC1, VC2 = sp.symbols("IL1 IL2 IL3 VC1 VC2 ")
 
         correct_values = _CorrectValues()
@@ -548,7 +548,7 @@ class TestStateEquations(_AssertResults):
         self._assert_all_results_equal(inspect.currentframe().f_code.co_name, correct_values)
 
     def test_state_equations_3(self):
-        Vin, R1, L1, R2, L2, C1, C2, RL = sp.symbols("Vin R1 L1 R2 L2 C1 C2 RL")
+        Vin, R1, L1, R2, L2, C1, C2, RL = sp.symbols("VIN R1 L1 R2 L2 C1 C2 RL")
         IL1, IL2, VC1, VC2 = sp.symbols("IL1 IL2 VC1 VC2")
 
         correct_values = _CorrectValues()

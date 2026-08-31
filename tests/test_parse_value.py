@@ -102,8 +102,8 @@ class TestValues(unittest.TestCase):
             sympy.Symbol("R0"),
             sympy.Symbol("I1"),
             sympy.Symbol("V2"),
-            sympy.Symbol("aBc123"),
-            sympy.Integer("-1") * sympy.Symbol("i"),
+            sympy.Symbol("ABC123"),
+            sympy.Integer("-1") * sympy.Symbol("I"),
         ]
         for n, correct_n in zip(symbols, correct_symbols):
             parsed_n = parse_value(n)
@@ -117,11 +117,11 @@ class TestValues(unittest.TestCase):
             sympy.Integer("10") * sympy.Symbol("R"),
             sympy.Integer("50") * sympy.Symbol("V2"),
             sympy.Integer("-10") * sympy.Symbol("I3"),
-            sympy.Integer("-1") * sympy.Symbol("i"),
+            sympy.Integer("-1") * sympy.Symbol("I"),
             sympy.Rational("2.2") * sympy.Symbol("R4"),
             sympy.Rational("-5.7") * sympy.Symbol("V5"),
-            sympy.Rational("-1") * sympy.Symbol("nano"),
-            sympy.Rational("-1") * sympy.Symbol("n"),
+            sympy.Rational("-1") * sympy.Symbol("NANO"),
+            sympy.Rational("-1") * sympy.Symbol("N"),
         ]
         for n, correct_n in zip(expressions, correct_expressions):
             parsed_n = parse_value(n)
@@ -148,9 +148,9 @@ class TestValues(unittest.TestCase):
             sympy.Rational("-0.00001") * sympy.Symbol("I3"),
             sympy.Integer("2200") * sympy.Symbol("R4"),
             sympy.Rational("-0.0000000000057") * sympy.Symbol("V5"),
-            sympy.Rational("0.0000001") * sympy.Symbol("Vin"),
-            sympy.Rational("-100000") * sympy.Symbol("Rk"),
-            sympy.Rational("0.0000000000102") * sympy.Symbol("p"),
+            sympy.Rational("0.0000001") * sympy.Symbol("VIN"),
+            sympy.Rational("-100000") * sympy.Symbol("RK"),
+            sympy.Rational("0.0000000000102") * sympy.Symbol("P"),
         ]
         for n, correct_n in zip(expressions, correct_expressions):
             parsed_n = parse_value(n)

@@ -4,6 +4,13 @@ from rtds_circuit_analysis.parse_netlist import Component
 from rtds_circuit_analysis.utils import error_message, flatten
 
 
+def check_component(components: list[Component]):
+    for component in components:
+        # NOTE: This will cause issues in the future, when dealing with dependant sources
+        if component.type not in ("V", "I", "R", "C", "L"):
+            error_message(f"Component type '{component.type}' does not exist!\nFor component '{component.name}'")
+
+
 def check_value_first_letter(components: list[Component]):
     """Check if the literals for the values of each component start with the same letter as their type. For example,
     capacitors literals should start with C, voltage sources with V, etc.
@@ -53,6 +60,7 @@ def parse_data(components: list[Component]):
     Args:
         components (list[Component]): List of components.
     """
+    check_component(components)
     check_value_first_letter(components)
     check_duplicates(components)
     check_ground(components)
