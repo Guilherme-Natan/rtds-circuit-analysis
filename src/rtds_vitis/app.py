@@ -6,6 +6,7 @@ from rtds_vitis.vitis_code import print_vitis_code
 
 
 def app():
+    """Run the command-line application that generates Vitis HLS code."""
     parser = create_parser()
     args = parser.parse_args()
 

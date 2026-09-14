@@ -5,6 +5,11 @@ from rtds_circuit_analysis.utils import error_message, flatten
 
 
 def check_component(components: list[Component]):
+    """Check whether every component has a supported type.
+
+    Args:
+        components (list[Component]): List of components to validate.
+    """
     for component in components:
         # NOTE: This will cause issues in the future, when dealing with dependant sources
         if component.type not in ("V", "I", "R", "C", "L"):
@@ -48,6 +53,11 @@ def check_duplicates(components: list[Component]):
 
 
 def check_ground(components: list[Component]):
+    """Check whether at least one component is connected to the ground node.
+
+    Args:
+        components (list[Component]): List of components to validate.
+    """
     node_list = flatten(component.nodes for component in components)
     if any(node == "0" for node in node_list):
         return

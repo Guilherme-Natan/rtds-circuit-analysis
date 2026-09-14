@@ -22,6 +22,7 @@ class Component:
     """
 
     def __init__(self, name: str, nodes: tuple[str], value: sp.Rational | sp.Symbol):
+        """Initialize a component and its voltage and current symbols from netlist data."""
         self.name = name
         self.type = name[0]
         self.nodes = nodes
@@ -47,6 +48,7 @@ class Component:
                 self.value = value
 
     def __str__(self):
+        """Return a human-readable description of the component."""
         if self.type == "short":
             return f"Short, that connect the nodes {self.nodes[0]} and {self.nodes[1]}"
 
@@ -59,6 +61,7 @@ class Component:
         )
 
     def __repr__(self):
+        """Return a concise representation of the component."""
         if self.type == "short":
             return f"Component(Short (originally {self.name}), {self.nodes})"
         return f"Component({self.name}, {self.nodes}, {self.value})"

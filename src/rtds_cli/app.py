@@ -5,6 +5,7 @@ from rtds_cli.print_data import print_data
 
 
 def app():
+    """Run the circuit-analysis command-line application."""
     parser = create_parser()
     args = parser.parse_args()
 

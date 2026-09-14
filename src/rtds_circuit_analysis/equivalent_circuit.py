@@ -14,11 +14,13 @@ class EquivalentComponent(Component):
     """Represents an equivalent component (capacitor or inductor)"""
 
     def __init__(self, components, directions, equivalent_value):
+        """Initialize an equivalent component from its originals, directions, and equivalent value."""
         self.originals = components
         self.inverted_flags = directions
         super().__init__(components[0].name, components[0].nodes, equivalent_value)
 
     def __str__(self):
+        """Return a human-readable description of the equivalent component."""
         component_type_table = dict(zip("CL", ("Capacitor", "Inductor")))
         return (
             f"Equivalent {component_type_table[self.type]}, made up originally of the components "
@@ -27,6 +29,7 @@ class EquivalentComponent(Component):
         )
 
     def __repr__(self):
+        """Return a detailed representation of the equivalent component."""
         return (
             f"EquivalentComponent({self.name}, {self.nodes}, {self.value}, {[i.name for i in self.originals]}, "
             f"{self.inverted_flags})"

@@ -42,6 +42,7 @@ class Circuit:
     """
 
     def __init__(self, netlist: str, time_step: str | None = None):
+        """Initialize the circuit from a netlist and compute its continuous and discrete equations."""
         if os.path.exists(netlist):
             netlist = get_lines(netlist)
         else:
@@ -67,30 +68,38 @@ class Circuit:
             self.forward = self.backward = self.trapezoidal = None
 
     def _formatted_components(self):
+        """Return the component list formatted for display."""
         return f'*** Components for the circuit ***\n{"\n".join(str(component) for component in self.components)}\n'
 
     def _formatted_currents(self, components=None):
+        """Return the selected component currents formatted for display."""
         return f"*** Currents ***\n{format_output(self.currents, components)}"
 
     def _formatted_component_voltages(self, components=None):
+        """Return the selected component voltages formatted for display."""
         return f"*** Voltages (components) ***\n{format_output(self.component_voltages, components)}"
 
     def _formatted_node_voltages(self, nodes=None):
+        """Return the selected node voltages formatted for display."""
         return f"*** Voltages (nodes) ***\n{format_output(self.node_voltages, nodes)}"
 
     def _formatted_states(self, components=None):
+        """Return the selected continuous state equations formatted for display."""
         return f"*** State equations (continuous) ***\
         \n{format_output(self.states, components, is_state=True, lhs_is_derivative=True)}"
 
     def _formatted_forward(self, components=None):
+        """Return the selected forward-Euler state equations formatted for display."""
         return f"*** State equations (forward) ***\
         \n{format_output(self.forward, components, is_state=True, is_discrete=True)}"
 
     def _formatted_backward(self, components=None):
+        """Return the selected backward-Euler state equations formatted for display."""
         return f"*** State equations (backward) ***\
         \n{format_output(self.backward, components, is_state=True, is_discrete=True)}"
 
     def _formatted_trapezoidal(self, components=None):
+        """Return the selected trapezoidal state equations formatted for display."""
         return f"*** State equations (trapezoidal) ***\
         \n{format_output(self.trapezoidal, components, is_state=True, is_discrete=True)}"
 
@@ -171,6 +180,7 @@ class Circuit:
             print("")
 
     def __str__(self):
+        """Return all circuit results in a human-readable representation."""
         return f"""{self._formatted_components()}
 {self._formatted_currents()}
 {self._formatted_component_voltages()}
@@ -181,6 +191,7 @@ class Circuit:
 {self._formatted_trapezoidal()}"""
 
     def __repr__(self):
+        """Return a detailed representation of the circuit and its computed values."""
         return f"""Circuit(
 components={str(self.components)},
 node_voltages={self.node_voltages},
