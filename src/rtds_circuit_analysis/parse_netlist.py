@@ -171,7 +171,7 @@ def parse_components(lines: list[str], time_step: None | str) -> tuple[list[Comp
 
     if time_step:
         time_step = parse_value(time_step)
-    if possible_time_step:
+    elif possible_time_step:
         time_step = parse_value(possible_time_step)
 
     return components, time_step

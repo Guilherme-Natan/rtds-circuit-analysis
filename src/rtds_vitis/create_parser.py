@@ -42,7 +42,7 @@ def create_parser():
         "--time-step",
         nargs="?",
         metavar="TIMESTEP",
-        help="Sets the time step used in the simulation. Not necessary if .STEP is set in the netlist.",
+        help="Sets the time step used in the simulation. Takes precedence over the netlist's .STEP, if set.",
     )
 
     code_generation.add_argument(
