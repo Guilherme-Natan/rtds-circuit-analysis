@@ -160,12 +160,13 @@ def get_parameters(equations: dict[str, sp.Eq]) -> list[str]:
     return parameters
 
 
-def get_cpp_headers(fixed: int, point: int) -> str:
+def get_cpp_headers(fixed: int, point: int, has_parameters: bool = False) -> str:
     """Layout the required information at the start of every vitis cpp file.
 
     Args:
         fixed (int): Total number of bits in the fixed-point representation.
         point (int): Number of bits after the binary point.
+        has_parameters (bool): Whether literal passive components need a type.
 
     Returns:
         str: The cpp header
@@ -177,10 +178,13 @@ def get_cpp_headers(fixed: int, point: int) -> str:
         f"typedef ap_fixed<{fixed}, {integer_bits}, "
         "AP_TRN, AP_WRAP> data_t;"
     )
-    return "#include <ap_fixed.h>\n" + wrap_cpp_statement(
+    code = "#include <ap_fixed.h>\n" + wrap_cpp_statement(
         fixed_type,
         width=CPP_MAX_LINE_LENGTH,
     ) + "\n"
+    if has_parameters:
+        code += "typedef ap_fixed<96, 32, AP_TRN, AP_WRAP> component_t;\n"
+    return code
 
 
 def get_cpp_parameters(parameters: list[str]) -> str:
@@ -195,7 +199,7 @@ def get_cpp_parameters(parameters: list[str]) -> str:
 
     output = "\n"
     for parameter in parameters:
-        definition = f"#define {parameter} data_t(CHANGEME)"
+        definition = f"#define {parameter} component_t(CHANGEME)"
         if len(definition) <= CPP_MAX_LINE_LENGTH:
             output += definition + "\n"
         else:
@@ -204,7 +208,7 @@ def get_cpp_parameters(parameters: list[str]) -> str:
             if len(parameter_line) > CPP_MAX_LINE_LENGTH:
                 parameter_line = f"{parameter}\\"
             output += parameter_line + "\n"
-            output += "    data_t(CHANGEME)\n"
+            output += "    component_t(CHANGEME)\n"
 
     return output
 
@@ -482,14 +486,14 @@ def generate_vitis_code(circuit: "Circuit", args: "Namespace") -> str:
         str: The generated C++ code.
     """
 
-    # C headers
-    code = get_cpp_headers(args.fixed, args.point)
-
     # Find the equations that generate the circuit, and its parameters
     equations = get_equations(circuit, args)
     parameters = get_parameters(equations)
 
-    # Generate CHANGEME data_t entries when some component values are literals
+    # Only declare the component type when literal values need it.
+    code = get_cpp_headers(args.fixed, args.point, bool(parameters))
+
+    # Use a wider fixed-point type for literal component values.
     if parameters:
         code += get_cpp_parameters(parameters)
 

@@ -1,8 +1,14 @@
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from rtds_circuit_analysis import Circuit
 from rtds_vitis.create_parser import create_parser
-from rtds_vitis.vitis_code import generate_vitis_code, get_cpp_headers
+from rtds_vitis.vitis_code import (
+    generate_vitis_code,
+    get_cpp_headers,
+    get_cpp_parameters,
+)
 
 
 class TestVitisParser(unittest.TestCase):
@@ -67,6 +73,39 @@ class TestVitisCode(unittest.TestCase):
         self.assertNotIn("aux_sinc", code)
         self.assertNotIn("ap_int", code)
         self.assertNotIn("uint1_t", code)
+
+    def test_literal_components_use_independent_fixed_point_type(self):
+        for fixed, point in ((32, 28), (24, 16)):
+            with self.subTest(fixed=fixed, point=point):
+                code = self._generate(
+                    "tests/test_files/series_rlc.cir", "-f", fixed, point,
+                )
+                self.assertIn(
+                    "typedef ap_fixed<96, 32, AP_TRN, AP_WRAP> component_t;",
+                    code,
+                )
+                for parameter in ("R", "L", "C"):
+                    self.assertIn(
+                        f"#define {parameter} component_t(CHANGEME)", code,
+                    )
+                self.assertNotIn("data_t(CHANGEME)", code)
+
+    def test_long_component_macro_uses_wider_type(self):
+        parameter = "R" + "x" * 70
+        code = get_cpp_parameters([parameter])
+        self.assertIn("    component_t(CHANGEME)\n", code)
+        self.assertTrue(all(len(line) <= 80 for line in code.splitlines()))
+
+    def test_numeric_components_do_not_declare_component_type(self):
+        with TemporaryDirectory() as directory:
+            filepath = Path(directory) / "numeric_rlc.cir"
+            filepath.write_text(
+                "V1 1 0 V\nR1 1 2 1000\nL1 2 3 1e-3\nC1 3 0 1e-6\n"
+            )
+            code = self._generate(str(filepath), "-f")
+        self.assertNotIn("component_t", code)
+        self.assertNotIn("CHANGEME", code)
+        self.assertIn("typedef ap_fixed<32, 4, AP_TRN, AP_WRAP> data_t;", code)
 
     def test_function_name_contains_each_method(self):
         cases = (

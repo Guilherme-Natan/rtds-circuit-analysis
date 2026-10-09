@@ -32,6 +32,17 @@ binary point and defaults to 28. Therefore, the default generated type is
 ``F - P``.
 
 Both options are optional. For example, ``-F 24 -P 16`` generates ``ap_fixed<24, 8, AP_TRN, AP_WRAP>``.
+
+Only circuits with literal passive component values declare a separate ``component_t`` type,
+``ap_fixed<96, 32, AP_TRN, AP_WRAP>``, independently of ``-F`` and ``-P``.
+The generated macros therefore use ``component_t(CHANGEME)``. Its 32 integer
+bits (including the sign bit) provide a range from -2^31 to 2^31 - 2^-64,
+and its 64 fractional bits provide a resolution of 2^-64 (approximately
+5.42e-20). Positive component values below this resolution are truncated
+to zero. Components are not converted to the narrower simulation ``data_t``
+before evaluating the equations. Values outside this range still wrap on
+overflow; the simulation inputs and states retain the range selected by
+``-F`` and ``-P``.
         
 .. admonition:: Saving to a file
    :class: tip
